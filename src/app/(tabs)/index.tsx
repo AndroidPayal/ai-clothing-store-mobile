@@ -14,10 +14,11 @@ import { useCart } from "@/context/CartContext";
 import { getProducts, Product } from "@/api/productApi";
 import ProductCard from "@/components/products/ProductCard";
 import { router } from "expo-router";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function HomeScreen() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
-
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,9 +108,21 @@ export default function HomeScreen() {
                     quantity: 1,
                   });
 
-                  console.log("PRODUCT ADDED TO CART:", item.title);
+                  console.log("Added to cart");
                 } catch (error) {
                   console.error("ADD TO CART ERROR:", error);
+                }
+              }}
+              isWishlisted={isInWishlist(item._id)}
+              onWishlistPress={async () => {
+                try {
+                  if (isInWishlist(item._id)) {
+                    await removeFromWishlist(item._id);
+                  } else {
+                    await addToWishlist(item);
+                  }
+                } catch (error) {
+                  console.error("WISHLIST ERROR:", error);
                 }
               }}
             />

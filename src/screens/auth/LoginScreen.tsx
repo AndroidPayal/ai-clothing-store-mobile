@@ -63,7 +63,7 @@ export default function LoginScreen() {
       <View style={styles.content}>
         <Text style={styles.logo}>AI Clothing</Text>
 
-        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.title}>Welcome</Text>
 
         <Text style={styles.subtitle}>
           Login to continue your fashion journey.

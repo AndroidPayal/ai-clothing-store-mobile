@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import type { Product } from "@/api/productApi";
 import { getProducts } from "@/api/productApi";
 import { useCart } from "@/context/CartContext";
+import { API_URL } from "@/config/api";
 
 export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams<{
@@ -63,7 +64,7 @@ export default function ProductDetailsScreen() {
     );
   }
 
-  const imageUrl = `http://10.200.208.91:3000${product.image}`;
+  const imageUrl = `${API_URL}${product.image}`;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

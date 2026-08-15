@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://10.200.208.91:3000";
+import { API_URL } from "@/config/api";
+
 
 export type Product = {
   _id: string;

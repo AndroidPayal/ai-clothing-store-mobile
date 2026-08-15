@@ -11,7 +11,6 @@ import { Redirect, router } from "expo-router";
 
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
-import { createPaymentOrder } from "@/api/paymentApi";
 
 export default function CartScreen() {
   const { items, isLoading, updateQuantity, removeFromCart, clearCart } =
@@ -155,19 +154,7 @@ export default function CartScreen() {
 
             <Pressable
               style={styles.checkoutButton}
-              onPress={async () => {
-                try {
-                  console.log("CHECKOUT PRESSED");
-
-                  const amount = 2499;
-
-                  const order = await createPaymentOrder(amount);
-
-                  console.log("RAZORPAY ORDER CREATED:", order);
-                } catch (error) {
-                  console.error("PAYMENT START ERROR:", error);
-                }
-              }}
+              onPress={() => router.push("/checkout")}
             >
               <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
             </Pressable>
