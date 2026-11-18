@@ -1,13 +1,10 @@
 import axios from "axios";
 
 import { getToken } from "@/storage/tokenStorage";
-
 import { API_URL } from "@/config/api";
 
 async function getAuthHeaders() {
   const token = await getToken();
-
-  console.log("WISHLIST API TOKEN:", token ? "TOKEN FOUND" : "NO TOKEN");
 
   if (!token) {
     throw new Error("User is not logged in");
@@ -31,10 +28,15 @@ export async function getWishlist() {
 export async function updateWishlist(items: any[]) {
   const headers = await getAuthHeaders();
 
+  // Backend expects numeric product IDs, not full product objects.
+  const wishlistItems = items.map((item) => ({
+    productId: Number(item.id),
+  }));
+
   const response = await axios.put(
     `${API_URL}/api/wishlist`,
     {
-      items,
+      items: wishlistItems,
     },
     {
       headers,

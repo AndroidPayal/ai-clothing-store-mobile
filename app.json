@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ai-clothing-store-mobile",
+    "name": "SOZAN / NAZM",
     "slug": "ai-clothing-store-mobile",
     "scheme": "aiclothingstore",
     "version": "1.0.0",
@@ -12,13 +12,13 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#F7F4EE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.aiclothingstoremobile"
+      "package": "com.androidpayal.sozan"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,6 +29,12 @@
       "expo-secure-store",
       "expo-status-bar",
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f00b8f9a-7176-49cd-8433-cfeeea30995c"
+      }
+    }
   }
 }

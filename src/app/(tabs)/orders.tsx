@@ -36,13 +36,10 @@ export default function OrdersScreen() {
       setError(null);
 
       const data = await getOrders();
-
-      console.log("ORDERS LOADED:", data);
-
       setOrders(data);
     } catch (error) {
       console.error("ORDERS FETCH ERROR:", error);
-      setError("Unable to load orders.");
+      setError("Unable to load your orders. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -57,8 +54,8 @@ export default function OrdersScreen() {
   if (isLoading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.loadingText}>Loading orders...</Text>
+        <ActivityIndicator size="large" color="#A36D5D" />
+        <Text style={styles.loadingText}>Loading your orders...</Text>
       </View>
     );
   }
@@ -66,10 +63,11 @@ export default function OrdersScreen() {
   if (error) {
     return (
       <View style={styles.center}>
+        <Text style={styles.brand}>SOZAN / NAZM</Text>
         <Text style={styles.error}>{error}</Text>
 
-        <Pressable style={styles.retryButton} onPress={loadOrders}>
-          <Text style={styles.retryText}>Try Again</Text>
+        <Pressable style={styles.button} onPress={loadOrders}>
+          <Text style={styles.buttonText}>TRY AGAIN</Text>
         </Pressable>
       </View>
     );
@@ -78,14 +76,16 @@ export default function OrdersScreen() {
   if (orders.length === 0) {
     return (
       <View style={styles.center}>
-        <Text style={styles.emptyIcon}>📦</Text>
-        <Text style={styles.emptyTitle}>No Orders Yet</Text>
+        <Text style={styles.brand}>SOZAN / NAZM</Text>
+        <Text style={styles.emptyIcon}>◇</Text>
+        <Text style={styles.emptyTitle}>Nothing here. Yet.</Text>
         <Text style={styles.emptyText}>
-          Your placed orders will appear here.
+          Your orders will find their place here. Discover pieces that feel like
+          you.
         </Text>
 
-        <Pressable style={styles.shopButton} onPress={() => router.push("/")}>
-          <Text style={styles.shopButtonText}>Start Shopping</Text>
+        <Pressable style={styles.button} onPress={() => router.replace("/")}>
+          <Text style={styles.buttonText}>EXPLORE COLLECTION</Text>
         </Pressable>
       </View>
     );
@@ -93,7 +93,21 @@ export default function OrdersScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>My Orders</Text>
+      <View style={styles.brandHeader}>
+        <Text style={styles.brand}>SOZAN / NAZM</Text>
+        <Text style={styles.brandCaption}>CONTEMPORARY INDIAN WEAR</Text>
+      </View>
+
+      <View style={styles.headingSection}>
+        <Text style={styles.eyebrow}>YOUR PURCHASES</Text>
+        <Text style={styles.title}>My Orders.</Text>
+        <Text style={styles.subtitle}>
+          A little something you've chosen for yourself.
+        </Text>
+        <Text style={styles.orderCount}>
+          {orders.length} {orders.length === 1 ? "ORDER" : "ORDERS"}
+        </Text>
+      </View>
 
       <FlatList
         data={orders}
@@ -106,7 +120,13 @@ export default function OrdersScreen() {
             0,
           );
 
-          const date = new Date(item.createdAt).toLocaleDateString();
+          const date = new Date(item.createdAt).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          });
+
+          const status = item.status.replace(/[-_]/g, " ");
 
           return (
             <Pressable
@@ -115,36 +135,58 @@ export default function OrdersScreen() {
             >
               <View style={styles.orderHeader}>
                 <View>
-                  <Text style={styles.orderLabel}>Order</Text>
+                  <Text style={styles.orderLabel}>ORDER REFERENCE</Text>
                   <Text style={styles.orderId}>
                     #{item._id.slice(-8).toUpperCase()}
                   </Text>
                 </View>
 
                 <View style={styles.statusBadge}>
-                  <Text style={styles.statusText}>{item.status}</Text>
+                  <Text style={styles.statusText}>{status.toUpperCase()}</Text>
                 </View>
               </View>
 
               <View style={styles.divider} />
 
-              <Text style={styles.itemsText}>
-                {itemCount} {itemCount === 1 ? "item" : "items"}
-              </Text>
+              <Text style={styles.itemsLabel}>YOUR SELECTION</Text>
+
+              {item.items.slice(0, 2).map((orderItem, index) => (
+                <View key={`${item._id}-${index}`} style={styles.productRow}>
+                  <Text style={styles.productName} numberOfLines={1}>
+                    {orderItem.product?.title || "Product"}
+                  </Text>
+                  <Text style={styles.productQuantity}>
+                    × {orderItem.quantity}
+                  </Text>
+                </View>
+              ))}
+
+              {item.items.length > 2 && (
+                <Text style={styles.moreItems}>
+                  + {item.items.length - 2} more products
+                </Text>
+              )}
+
+              <View style={styles.divider} />
 
               <View style={styles.bottomRow}>
                 <View>
-                  <Text style={styles.dateLabel}>Ordered on</Text>
+                  <Text style={styles.dateLabel}>ORDERED ON</Text>
                   <Text style={styles.date}>{date}</Text>
                 </View>
 
                 <View style={styles.priceContainer}>
-                  <Text style={styles.totalLabel}>Total</Text>
-                  <Text style={styles.total}>₹{item.total}</Text>
+                  <Text style={styles.totalLabel}>TOTAL</Text>
+                  <Text style={styles.total}>
+                    ₹{item.total.toLocaleString("en-IN")}
+                  </Text>
                 </View>
               </View>
 
-              <Text style={styles.viewDetails}>View Details →</Text>
+              <View style={styles.detailsRow}>
+                <Text style={styles.viewDetails}>VIEW ORDER DETAILS</Text>
+                <Text style={styles.arrow}>→</Text>
+              </View>
             </Pressable>
           );
         }}
@@ -156,164 +198,221 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: "#F7F4EE",
+    paddingHorizontal: 18,
+    paddingTop: 18,
   },
-
-  title: {
-    fontSize: 28,
+  brandHeader: {
+    alignItems: "center",
+    paddingBottom: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5DED3",
+  },
+  brand: {
+    fontSize: 19,
     fontWeight: "700",
-    marginBottom: 20,
+    letterSpacing: 3,
+    color: "#25221F",
   },
-
+  brandCaption: {
+    fontSize: 8,
+    letterSpacing: 2,
+    color: "#81776D",
+    marginTop: 6,
+  },
+  headingSection: {
+    paddingTop: 25,
+    paddingBottom: 20,
+  },
+  eyebrow: {
+    fontSize: 9,
+    letterSpacing: 1.8,
+    color: "#A36D5D",
+    fontWeight: "600",
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "500",
+    color: "#25221F",
+    marginTop: 8,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#776C62",
+    marginTop: 7,
+    lineHeight: 19,
+  },
+  orderCount: {
+    fontSize: 9,
+    letterSpacing: 1.5,
+    color: "#81776D",
+    marginTop: 17,
+  },
   list: {
     paddingBottom: 30,
   },
-
   orderCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FBF9F5",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 14,
+    borderColor: "#E5DED3",
     padding: 16,
     marginBottom: 14,
   },
-
   orderHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-
   orderLabel: {
-    fontSize: 13,
-    color: "#6B7280",
+    fontSize: 8,
+    letterSpacing: 1.3,
+    color: "#81776D",
   },
-
   orderId: {
     fontSize: 17,
-    fontWeight: "700",
-    marginTop: 2,
-  },
-
-  statusBadge: {
-    backgroundColor: "#DCFCE7",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-
-  statusText: {
-    color: "#166534",
-    fontSize: 12,
     fontWeight: "600",
+    color: "#25221F",
+    marginTop: 5,
   },
-
+  statusBadge: {
+    backgroundColor: "#EAE2D7",
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  statusText: {
+    color: "#695044",
+    fontSize: 8,
+    fontWeight: "700",
+    letterSpacing: 0.7,
+  },
   divider: {
     height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 14,
+    backgroundColor: "#E5DED3",
+    marginVertical: 15,
   },
-
-  itemsText: {
-    fontSize: 15,
-    color: "#374151",
-    marginBottom: 14,
+  itemsLabel: {
+    fontSize: 8,
+    letterSpacing: 1.3,
+    color: "#A36D5D",
+    marginBottom: 10,
   },
-
+  productRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 7,
+  },
+  productName: {
+    flex: 1,
+    fontSize: 13,
+    color: "#25221F",
+    marginRight: 12,
+  },
+  productQuantity: {
+    fontSize: 12,
+    color: "#776C62",
+  },
+  moreItems: {
+    fontSize: 11,
+    color: "#81776D",
+    marginTop: 3,
+  },
   bottomRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
-
   dateLabel: {
-    fontSize: 12,
-    color: "#6B7280",
+    fontSize: 8,
+    letterSpacing: 1.2,
+    color: "#81776D",
   },
-
   date: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginTop: 3,
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#25221F",
+    marginTop: 6,
   },
-
   priceContainer: {
     alignItems: "flex-end",
   },
-
   totalLabel: {
-    fontSize: 12,
-    color: "#6B7280",
+    fontSize: 8,
+    letterSpacing: 1.2,
+    color: "#81776D",
   },
-
   total: {
     fontSize: 19,
-    fontWeight: "700",
-    marginTop: 3,
-  },
-
-  viewDetails: {
-    marginTop: 16,
-    fontSize: 14,
     fontWeight: "600",
+    color: "#25221F",
+    marginTop: 4,
   },
-
+  detailsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#E5DED3",
+    marginTop: 15,
+    paddingTop: 13,
+  },
+  viewDetails: {
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    color: "#A36D5D",
+  },
+  arrow: {
+    fontSize: 18,
+    color: "#A36D5D",
+  },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 30,
+    padding: 28,
+    backgroundColor: "#F7F4EE",
   },
-
   loadingText: {
     marginTop: 12,
-    fontSize: 15,
+    fontSize: 12,
+    color: "#776C62",
   },
-
   error: {
-    color: "red",
-    fontSize: 16,
+    fontSize: 14,
+    color: "#9B5948",
     textAlign: "center",
+    marginVertical: 20,
+  },
+  emptyIcon: {
+    fontSize: 55,
+    color: "#A36D5D",
+    marginTop: 35,
     marginBottom: 15,
   },
-
-  retryButton: {
-    backgroundColor: "#111827",
-    paddingHorizontal: 20,
-    paddingVertical: 11,
-    borderRadius: 8,
-  },
-
-  retryText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-
-  emptyIcon: {
-    fontSize: 50,
-    marginBottom: 10,
-  },
-
   emptyTitle: {
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 25,
+    fontWeight: "500",
+    color: "#25221F",
   },
-
   emptyText: {
-    color: "#6B7280",
-    marginTop: 8,
+    fontSize: 13,
+    lineHeight: 21,
+    color: "#776C62",
+    marginTop: 10,
+    marginBottom: 25,
     textAlign: "center",
-    marginBottom: 20,
   },
-
-  shopButton: {
-    backgroundColor: "#111827",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
+  button: {
+    backgroundColor: "#25221F",
+    paddingHorizontal: 25,
+    paddingVertical: 16,
+    marginTop: 5,
   },
-
-  shopButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
+  buttonText: {
+    color: "#F7F4EE",
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.2,
   },
 });

@@ -56,7 +56,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addToWishlist = async (product: Product) => {
-    if (items.some((item) => item._id === product._id)) {
+    if (items.some((item) => item.id === product.id)) {
       return;
     }
 
@@ -64,11 +64,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeFromWishlist = async (productId: string) => {
-    await saveWishlist(items.filter((item) => item._id !== productId));
+    await saveWishlist(items.filter((item) => String(item.id) !== productId));
   };
 
   const isInWishlist = (productId: string) => {
-    return items.some((item) => item._id === productId);
+    return items.some((item) => String(item.id) === productId);
   };
 
   return (

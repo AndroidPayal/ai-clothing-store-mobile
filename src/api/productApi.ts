@@ -2,7 +2,6 @@ import axios from "axios";
 
 import { API_URL } from "@/config/api";
 
-
 export type Product = {
   _id: string;
   id: number;

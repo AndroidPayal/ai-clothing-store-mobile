@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 import { getCart, updateCart } from "@/api/cartApi";
 import type { Product } from "@/api/productApi";
-
 import { useAuth } from "@/context/AuthContext";
 
 export interface CartItem {
@@ -26,7 +25,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const { isLoading: authLoading, isAuthenticated } = useAuth();
 
   const [items, setItems] = useState<CartItem[]>([]);
-
   const [isLoading, setIsLoading] = useState(true);
 
   // Load cart from MongoDB
@@ -41,7 +39,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
 
       const cart = await getCart();
-
       setItems(cart?.items || []);
     } catch (error) {
       console.error("REFRESH CART ERROR:", error);
@@ -52,9 +49,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Refresh cart after authentication is restored
   useEffect(() => {
-    if (authLoading) {
-      return;
-    }
+    if (authLoading) return;
 
     refreshCart();
   }, [authLoading, isAuthenticated]);
@@ -63,29 +58,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const saveCart = async (newItems: CartItem[]) => {
     try {
       await updateCart(newItems);
-
       setItems(newItems);
     } catch (error) {
       console.error("SAVE CART ERROR:", error);
-
       throw error;
     }
   };
 
   // Add product to cart
   const addToCart = async (item: CartItem) => {
+    if (item.product.inStock !== true) {
+      throw new Error("This product is currently out of stock.");
+    }
+
+    if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+      throw new Error("Invalid product quantity.");
+    }
+
     const existingItem = items.find(
-      (cartItem) => cartItem.product._id === item.product._id,
+      (cartItem) => cartItem.product.id === item.product.id,
     );
+
+    const existingQuantity = existingItem?.quantity || 0;
+    const newQuantity = existingQuantity + item.quantity;
+
+    if (newQuantity > 99) {
+      throw new Error("Maximum quantity allowed is 99.");
+    }
 
     let newItems: CartItem[];
 
     if (existingItem) {
       newItems = items.map((cartItem) =>
-        cartItem.product._id === item.product._id
+        cartItem.product.id === item.product.id
           ? {
               ...cartItem,
-              quantity: cartItem.quantity + item.quantity,
+              quantity: newQuantity,
             }
           : cartItem,
       );
@@ -98,7 +106,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Remove product completely
   const removeFromCart = async (productId: string) => {
-    const newItems = items.filter((item) => item.product._id !== productId);
+    const newItems = items.filter(
+      (item) => String(item.product.id) !== String(productId),
+    );
 
     await saveCart(newItems);
   };
@@ -110,8 +120,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    if (!Number.isInteger(quantity) || quantity > 99) {
+      throw new Error("Quantity must be between 1 and 99.");
+    }
+
     const newItems = items.map((item) =>
-      item.product._id === productId
+      String(item.product.id) === String(productId)
         ? {
             ...item,
             quantity,

@@ -26,18 +26,18 @@ export async function getCart() {
 
   return response.data.cart;
 }
-
 export async function updateCart(items: any[]) {
   const headers = await getAuthHeaders();
 
+  const cartItems = items.map((item) => ({
+    productId: Number(item.product.id),
+    quantity: Number(item.quantity),
+  }));
+
   const response = await axios.put(
     `${API_URL}/api/cart`,
-    {
-      items,
-    },
-    {
-      headers,
-    },
+    { items: cartItems },
+    { headers },
   );
 
   return response.data.cart;
